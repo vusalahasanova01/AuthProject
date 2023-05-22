@@ -1,0 +1,92 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.0.1'
+	id 'nu.studer.jooq' version '5.2.1'
+	id 'io.spring.dependency-management' version '1.1.0'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+java.sourceCompatibility = 17
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenLocal()
+	maven {
+		url = uri('https://repo.maven.apache.org/maven2/')
+	}
+	mavenCentral()
+}
+dependencies {
+
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+	implementation 'org.projectlombok:lombok:1.18.26'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	implementation 'io.jsonwebtoken:jjwt-orgjson:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	runtimeOnly 'org.postgresql:postgresql:42.5.4'
+	jooqGenerator 'org.postgresql:postgresql:42.5.4'
+
+	implementation 'org.jooq:jooq-codegen-maven:3.18.3'
+
+
+}
+jooq {
+	configurations {
+		main {  // name of the jOOQ configuration
+			generationTool {
+				logging = org.jooq.meta.jaxb.Logging.WARN
+				jdbc {
+					driver = 'org.postgresql.Driver'
+					url = 'jdbc:postgresql://localhost:5432/topaz-db'
+					user = 'postgres'
+					password = 'Butterfly2001'
+				}
+				generator {
+					name = 'org.jooq.codegen.DefaultGenerator'
+					database {
+						name = 'org.jooq.meta.postgres.PostgresDatabase'
+						inputSchema = 'public'
+						forcedTypes {
+							forcedType {
+								name = 'varchar'
+								includeExpression = '.*'
+								includeTypes = 'JSONB?'
+							}
+							forcedType {
+								name = 'varchar'
+								includeExpression = '.*'
+								includeTypes = 'INET'
+							}
+						}
+					}
+					generate {
+						deprecated = false
+						records = true
+						immutablePojos = true
+						fluentSetters = true
+					}
+					target {
+						packageName = 'com.example.demo.*'
+					}
+					strategy.name = 'org.jooq.codegen.DefaultGeneratorStrategy'
+				}
+			}
+		}
+	}
+}
+tasks.named('test') {
+	useJUnitPlatform()
+}
